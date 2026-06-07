@@ -37,6 +37,7 @@ traditional network security concepts.
 - Created and attached lab-igw to lab-vpc
 - Why: single controlled door to the internet; does nothing until
   referenced in a route table
+  
   ### Route tables
 - Created lab-public-rt with route 0.0.0.0/0 -> lab-igw
 - Associated both public subnets with lab-public-rt
@@ -55,6 +56,14 @@ traditional network security concepts.
   - .255 broadcast (unused but reserved)
 - Security note: the .2 DNS address is a key point for DNS query
   logging and detecting DNS-based exfiltration
+  
+  ### Route table verification
+- Confirmed main route table has only the local route (no internet path)
+- Both private subnets fall back to the main route table (implicitly)
+- Verified private subnets have no 0.0.0.0/0 route = isolated by design
+- Best practice note: production setups should explicitly associate
+  subnets with route tables rather than rely on implicit defaults,
+  to prevent silent inheritance of unintended route changes
 
 ## Status
 - [x] VPC created
