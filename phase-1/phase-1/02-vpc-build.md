@@ -37,11 +37,29 @@ traditional network security concepts.
 - Created and attached lab-igw to lab-vpc
 - Why: single controlled door to the internet; does nothing until
   referenced in a route table
+  ### Route tables
+- Created lab-public-rt with route 0.0.0.0/0 -> lab-igw
+- Associated both public subnets with lab-public-rt
+- Left private subnets on the main route table (local route only)
+- Why: routing is what actually enforces the public/private boundary.
+  Private subnets have no internet route, so instances there cannot
+  reach the internet directly regardless of security group settings
+  — this is defense through architecture (layered protection)
+
+### AWS subnet IP reservations
+- AWS reserves 5 IPs per subnet, not the usual 2:
+  - .0 network address
+  - .1 VPC router (implicit gateway)
+  - .2 Amazon DNS resolver
+  - .3 reserved for future use
+  - .255 broadcast (unused but reserved)
+- Security note: the .2 DNS address is a key point for DNS query
+  logging and detecting DNS-based exfiltration
 
 ## Status
 - [x] VPC created
 - [x] Subnets created
 - [x] Internet Gateway attached
-- [ ] Route tables
+- [X] Route tables
 - [ ] Security groups
 - [ ] EC2 + bastion host test
