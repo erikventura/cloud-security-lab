@@ -57,14 +57,30 @@ traditional network security concepts.
 - Security note: the .2 DNS address is a key point for DNS query
   logging and detecting DNS-based exfiltration
   
-  ### Route table verification
-- Confirmed main route table has only the local route (no internet path)
-- Both private subnets fall back to the main route table (implicitly)
-- Verified private subnets have no 0.0.0.0/0 route = isolated by design
-- Best practice note: production setups should explicitly associate
-  subnets with route tables rather than rely on implicit defaults,
-  to prevent silent inheritance of unintended route changes
+### Route tables (production best practice)
+- Created lab-public-rt: route 0.0.0.0/0 -> lab-igw, associated both public subnets
+- Created lab-private-rt: local route only (NAT route added later),
+  explicitly associated both private subnets
+- Left the VPC main route table unused
+- Why explicit associations: makes the architecture intentional and
+  auditable; prevents private subnets from silently inheriting changes
+  to the main route table
 
+### Why multiple route tables in one VPC
+- Route tables apply per-subnet, not per-VPC
+- Public and private tiers have different egress needs:
+  - Public: 0.0.0.0/0 -> Internet Gateway (inbound + outbound)
+  - Private: 0.0.0.0/0 -> NAT Gateway (outbound only) or no internet route
+- This per-segment routing is what enables tiered segmentation /
+  microsegmentation within a single VPC
+
+### Default VPC security note
+- Account has a default VPC (172.31.0.0/16) with all-public subnets
+- Common security finding: default VPCs expose resources unintentionally
+- Best practice: delete unused default VPCs or document their existence;
+  CSPM tools (e.g. Prowler) flag them
+- Lab decision: leave default VPC untouched, launch nothing into it,
+  always target lab1-vpc explicitly
 ## Status
 - [x] VPC created
 - [x] Subnets created
