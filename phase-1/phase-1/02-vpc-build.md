@@ -81,10 +81,38 @@ traditional network security concepts.
   CSPM tools (e.g. Prowler) flag them
 - Lab decision: leave default VPC untouched, launch nothing into it,
   always target lab1-vpc explicitly
+
+  ### Security groups (tiered, production pattern)
+
+Built a strict trust chain: internet -> bastion -> app -> database.
+Each tier only trusts the tier directly above it.
+
+| SG | Inbound rule | Source | Purpose |
+|----|-------------|--------|---------|
+| lab-bastion-sg | SSH (22) | My IP (/32) | Single hardened entry point |
+| lab-app-sg | SSH (22) | lab-bastion-sg | App mgmt only via bastion |
+| lab-db-sg | MySQL (3306) | lab-app-sg | DB reachable only from app tier |
+
+### Key security group concepts
+- Stateful: return traffic auto-allowed (like FortiGate policies)
+- Allow-only: no explicit deny; implicit deny on anything not listed
+  (use NACLs for explicit deny / IP blocking)
+- SG-to-SG references: source can be another security group, not just
+  an IP. This is identity-based access and the foundation of zero-trust
+  segmentation inside AWS — rules stay correct as instances scale/change
+
+### Operational notes
+- Bastion SSH pinned to my IP as /32. Residential/CGNAT IP changes will
+  break this rule and require updating it (real operational consideration)
+- DB SG has NO SSH and NO internet exposure — exposed databases are a
+  critical finding behind many major breaches
+- Modern alternative to bastion: SSM Session Manager (no open SSH port
+  at all) - to explore later
+
 ## Status
 - [x] VPC created
 - [x] Subnets created
 - [x] Internet Gateway attached
 - [X] Route tables
-- [ ] Security groups
+- [X] Security groups
 - [ ] EC2 + bastion host test
