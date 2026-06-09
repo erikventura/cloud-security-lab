@@ -103,7 +103,6 @@ aws ec2 authorize-security-group-ingress --group-id <DB_SG_ID> \
 \```
 
 ## 6. Bastion instance
-## 6. Bastion instance
 # Key pair (create once, save the .pem securely - cannot re-download)
 aws ec2 create-key-pair --key-name lab1-bastion --key-type ed25519 \
   --query 'KeyMaterial' --output text > lab1-bastion.pem
