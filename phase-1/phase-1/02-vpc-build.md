@@ -109,10 +109,38 @@ Each tier only trusts the tier directly above it.
 - Modern alternative to bastion: SSM Session Manager (no open SSH port
   at all) - to explore later
 
+  ### Bastion -> app hop verified (tiered trust proven)
+
+Architecture proven end to end:
+  my IP -> bastion (lab1-bastion key) -> app (lab1-app key)
+
+Tests performed:
+- Negative test: direct SSH from workstation to app private IP -> timed out
+  (no route into VPC private space, no public IP) = isolation confirmed
+- Positive test: SSH to bastion with agent forwarding, then hopped to app
+  using forwarded lab1-app key = controlled path works
+
+Security properties demonstrated:
+- App instance: no public IP, private subnet, no internet route
+- lab1-app-sg accepts SSH only from lab1-bastion-sg (SG-to-SG reference)
+- Per-tier key isolation: separate key pair per tier (blast-radius containment)
+- Agent forwarding (-A): bastion authenticates onward hop using key held on
+  my workstation; private keys never stored on the bastion (key-theft protection)
+
+Why this matters: this is the classic secure-access pattern. Next step is to
+replace it with SSM Session Manager to eliminate long-lived SSH keys entirely
+and tie access to IAM identity with full session logging.
+
+### Status
+- [x] Bastion launched and access verified
+- [x] App instance launched (private, no public IP)
+- [x] Negative + positive access tests passed
+- [x] Per-tier key isolation + agent forwarding implemented
+
 ## Status
 - [x] VPC created
 - [x] Subnets created
 - [x] Internet Gateway attached
 - [X] Route tables
 - [X] Security groups
-- [ ] EC2 + bastion host test
+- [X] EC2 + bastion host test
