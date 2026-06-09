@@ -128,6 +128,21 @@ aws ssm get-parameter \
 - Windows lesson: quote paths with spaces; MobaXterm maps C: to /drives/c/
 - Operational note: stopping the instance changes its public IP on restart
 
+## 6b. App instance (private tier)
+# Dedicated key pair (per-tier isolation)
+aws ec2 create-key-pair --key-name lab1-app --key-type ed25519 \
+  --query 'KeyMaterial' --output text > lab1-app.pem
+
+# Launch into PRIVATE subnet, no public IP, app SG
+aws ec2 run-instances \
+  --image-id <AL2023_AMI_ID> \
+  --instance-type t2.micro \
+  --key-name lab1-app \
+  --subnet-id subnet-01efc5725e9bcfca3 \
+  --security-group-ids sg-07a7893d2f0bfffcd \
+  --no-associate-public-ip-address \
+  --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=lab-app}]'
+
 ## 7. [METERED] NAT Gateway — create at session start, DELETE at session end
 (added when we build it)
 
